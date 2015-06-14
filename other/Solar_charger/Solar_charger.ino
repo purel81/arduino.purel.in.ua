@@ -9,32 +9,36 @@
 
 // These constants won't change.  They're used to give names
 // to the pins used:
-const int analogInPin = A6;  // Analog input pin that the VBAT pin is attached to
+const int analogInPin  = A6;  // Analog input pin that the VBAT pin is attached to
 
-int BatteryValue = 0;        // value read from the VBAT pin
-float outputValue = 0;        // variable for voltage calculation
+int       BatteryValue = 0;   // value read from the VBAT pin
+float     outputValue  = 0;   // variable for voltage calculation
 
 
 void setup() {
+  
   // initialize serial communications at 9600 bps:
   Serial.begin(9600);
+  
 }
 
 void loop() {
+  
   // read the analog in value:
   BatteryValue = analogRead(analogInPin);
   // Calculate the battery voltage value
   outputValue = (float(BatteryValue) * 5) / 1023 * 2;
-  
+
   // print the results to the serial monitor:
   Serial.print("Analog value = ");
   Serial.print(BatteryValue);
   Serial.print("\t voltage = ");
   Serial.print(outputValue);
   Serial.println("V \n");
-    
+
   // wait 10 milliseconds before the next loop
   // for the analog-to-digital converter to settle
   // after the last reading:
   delay(1000);
+  
 }
