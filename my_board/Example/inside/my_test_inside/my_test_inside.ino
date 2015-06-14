@@ -8,6 +8,7 @@
 const int Backlight         = 10;  // Подсветка
 const int GreenLed          = 13;  // пин Зелёного светодиода
 int       RS_pin            = 8;
+int       RW_pin               ;
 int       Enable_pin        = 9;
 int       D4_pin            = 4;
 int       D5_pin            = 5;
