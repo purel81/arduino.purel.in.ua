@@ -58,7 +58,7 @@ void loop() {
 
   ReadSerialInput();
   // Calculate();
-  // PrintOnLcd();
+  PrintOnLcd();
   // PrintSerial();
 
   // if the LED is off turn it on and vice-versa:
@@ -117,14 +117,12 @@ void PrintOnLcd() {
   lcd.print(VBATvalue);           // display seconds elapsed since power-up
   lcd.setCursor(0, 1);            // move cursor to second line "0" and 0 spaces over
   lcd.print("B=");                // display seconds elapsed since power-
-  lcd.setCursor(3, 1);           // move cursor to second line "0" and 0 spaces over
   lcd.print(VBATfloatValue);      // display seconds elapsed since power-up
   lcd.setCursor(0, 2);            // move cursor to second line "0" and 0 spaces over
   lcd.print("C=");                // display seconds elapsed since power-up
   lcd.print(SOLARvalue);          // display seconds elapsed since power-up
-  lcd.setCursor(3, 2);            // move cursor to second line "0" and 0 spaces over
+  lcd.setCursor(0, 3);            // move cursor to second line "0" and 0 spaces over
   lcd.print("D=");                // display seconds elapsed since power-up
-  lcd.setCursor(0, 3);           // move cursor to second line
   lcd.print(SOLARfloatValue);     // display seconds elapsed since power-up
 }
 
