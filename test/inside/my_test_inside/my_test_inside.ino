@@ -3,16 +3,16 @@
  */
 
 // start of LCD pin definitions
-#include <LiquidCrystal.h>
+#include <LiquidCrystalRus.h>
 
 const int Backlight         = 10;  // Подсветка
 const int GreenLed          = 13;  // пин Зелёного светодиода
-int       LCD_RS_pin        = 8;
-int       LCD_Enable_pin    = 9;
-int       LCD_D4_pin        = 4;
-int       LCD_D5_pin        = 5;
-int       LCD_D6_pin        = 6;
-int       LCD_D7_pin        = 7;
+int       RS_pin            = 8;
+int       Enable_pin        = 9;
+int       D4_pin            = 4;
+int       D5_pin            = 5;
+int       D6_pin            = 6;
+int       D7_pin            = 7;
 int       TimeDelay         = 1000;// значение в милисекундах
 int       GreenLedState     = LOW; // состояние Зелёного светодиода
 int       VBATvalue         = 0;   // значение АЦП для АКБ
@@ -22,7 +22,7 @@ float     SOLARfloatValue   = 0;   // значение напряжения Па
 String    inString          = "";  // string to hold input
 
 // select the pins used on the LCD panel
-LiquidCrystal lcd(LCD_RS_pin, LCD_Enable_pin, LCD_D4_pin, LCD_D5_pin, LCD_D6_pin, LCD_D7_pin);
+LiquidCrystalRus lcd(RS_pin, Enable_pin, D4_pin, D5_pin, D6_pin, D7_pin);
 
 void setup() {
   
@@ -42,12 +42,10 @@ void setup() {
 
   // set up the LCD's number of columns and rows:
   lcd.begin(20, 4);
-  lcd.setCursor(0, 0);        // set the LCD cursor   position
-  lcd.print("Solar charge");  // print a simple message on the LCD
-  lcd.clear();         // очистить экран
-
-  // ждём заданный интервал
-  delay(TimeDelay);
+  lcd.setCursor(0, 0);            // set the LCD cursor   position
+  lcd.print("LiquidCrystalRus");  // print a simple message on the LCD
+  delay(TimeDelay);               // ждём заданный интервал
+  lcd.clear();                    // очистить экран
 
   // зададим как выход
   pinMode(GreenLed, OUTPUT);
