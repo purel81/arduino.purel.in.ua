@@ -5,10 +5,10 @@
 // start of LCD pin definitions
 #include <LiquidCrystalRus.h>
 
-const int Backlight         = 10;  // Подсветка
+const int Backlight         = 0;  // Подсветка
 const int GreenLed          = 13;  // пин Зелёного светодиода
 int       RS_pin            = 8;
-int       RW_pin               ;
+int       RW_pin            = 10;
 int       Enable_pin        = 9;
 int       D4_pin            = 4;
 int       D5_pin            = 5;
@@ -23,7 +23,7 @@ float     SOLARfloatValue   = 0;   // значение напряжения Па
 String    inString          = "";  // string to hold input
 
 // select the pins used on the LCD panel
-LiquidCrystalRus lcd(RS_pin, Enable_pin, D4_pin, D5_pin, D6_pin, D7_pin);
+LiquidCrystalRus lcd(RS_pin, RW_pin, Enable_pin, D4_pin, D5_pin, D6_pin, D7_pin);
 
 void setup() {
 
