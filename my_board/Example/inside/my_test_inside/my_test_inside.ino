@@ -25,13 +25,13 @@ String    inString          = "";  // string to hold input
 LiquidCrystalRus lcd(RS_pin, Enable_pin, D4_pin, D5_pin, D6_pin, D7_pin);
 
 void setup() {
-  
+
   while (!Serial) {
     // wait for serial port to connect.
     // Needed for Leonardo only
     ;
   }
-  
+
   Serial.begin(9600);
   Serial1.begin(9600);
 
@@ -43,7 +43,7 @@ void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(20, 4);
   lcd.setCursor(0, 0);            // set the LCD cursor   position
-  lcd.print("LiquidCrystalRus");  // print a simple message on the LCD
+  lcd.print("Русская версия");  // print a simple message on the LCD
   delay(TimeDelay);               // ждём заданный интервал
   lcd.clear();                    // очистить экран
 
