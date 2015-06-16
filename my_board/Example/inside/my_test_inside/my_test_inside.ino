@@ -1,29 +1,62 @@
 /*
- http://www.seeedstudio.com/wiki/index.php?title=Solar_Charger_Shield_v2.0b
- */
+ http://arduino.purel.in.ua
+*/
 
-// start of LCD pin definitions
+// библиотека кириличнского экрана
 #include <LiquidCrystalRus.h>
+// библиотека часов
+#include <DS1307.h>
+// Библиотека памяти EEPROM
+#include <EEPROM.h>
 
-const int Backlight         = 0;  // Подсветка
+#include <SPI.h>
+#include <SD.h>
+#include <DallasTemperature.h>
+#include <OneWire.h>
+#include <TinyGPS++.h>
+#include <Servo.h>
+
+// Выходы
+const int Backlight         = 10;  // Подсветка
 const int GreenLed          = 13;  // пин Зелёного светодиода
-int       RS_pin            = 8;
-int       RW_pin            = 10;
-int       Enable_pin        = 9;
-int       D4_pin            = 4;
-int       D5_pin            = 5;
-int       D6_pin            = 6;
-int       D7_pin            = 7;
+const int SDA_pin           = 20;  // пин SDA
+const int SCL_pin           = 21;  // пин SCL
+const int RS_pin            = 8;
+const int RW_pin            = 0;   // Земля
+const int Enable_pin        = 9;
+const int D4_pin            = 4;
+const int D5_pin            = 5;
+const int D6_pin            = 6;
+const int D7_pin            = 7;
+
+// Переменные целые
 int       TimeDelay         = 1000;// значение в милисекундах
 int       GreenLedState     = LOW; // состояние Зелёного светодиода
 int       VBATvalue         = 0;   // значение АЦП для АКБ
 int       SOLARvalue        = 0;   // значение АЦП для Панели
+int       address           = 0;   // начальный адресс EEPROM
+
+// Переменные с плавающей точкой
 float     VBATfloatValue    = 0;   // значение напряжения АКБ
 float     SOLARfloatValue   = 0;   // значение напряжения Панели
-String    inString          = "";  // string to hold input
 
-// select the pins used on the LCD panel
-LiquidCrystalRus lcd(RS_pin, RW_pin, Enable_pin, D4_pin, D5_pin, D6_pin, D7_pin);
+// Переменная
+String    inString          = "";  // string to hold input
+byte      value;
+
+// установить выбраные значения для экрана
+// Инициализация LCD             RS,          E,    DB4,    DB5,    DB6,    DB7,   +,   -
+//               LCD (01-16)     08,         09,     04,     05,     06,     07,   +,   - )
+LiquidCrystalRus lcd       ( RS_pin, Enable_pin, D4_pin, D5_pin, D6_pin, D7_pin);
+
+// Настройка часов
+DS1307    rtc(SDA_pin, SCL_pin);    // Инициализация DS1307
+
+// On the Ethernet Shield, CS is pin 4. Note that even if it's not
+// used as the CS pin, the hardware CS pin (10 on most Arduino boards,
+// 53 on the Mega) must be left as an output or the SD library
+// functions will not work.
+const int chipSelect = 53;
 
 void setup() {
 
@@ -33,25 +66,46 @@ void setup() {
     ;
   }
 
-  Serial.begin(9600);
-  Serial1.begin(9600);
+  // Включение серийных портов
+  Serial.begin(9600);                // Общий
+  Serial1.begin(4800);               // GPS
+  Serial2.begin(57600);              // GSM(GPRS)
+  Serial3.begin(9600);               // ARDUINO
 
   // зададим пин подсветки как выход
   pinMode(Backlight, OUTPUT);
+
   // включим подсветку
   BacklightOn();
-
-  // set up the LCD's number of columns and rows:
-  lcd.begin(20, 4);
-  lcd.setCursor(0, 0);            // set the LCD cursor   position
-  lcd.print("Русская версия");  // print a simple message on the LCD
-  delay(TimeDelay);               // ждём заданный интервал
-  lcd.clear();                    // очистить экран
 
   // зададим как выход
   pinMode(GreenLed, OUTPUT);
   // включим его
   digitalWrite(GreenLed, HIGH);
+
+  // установить для LCD's колличество колонок и строк
+  lcd.begin(20, 4);
+  // установить курсор в позицию
+  lcd.setCursor(0, 0);
+  // приветствие
+  lcd.print("Русская версия");
+  // ждём заданный интервал
+  delay(TimeDelay);
+  // отчистить экран
+  lcd.clear();
+
+  Serial.print("Initializing SD card...");
+  // make sure that the default chip select pin is set to
+  // output, even if you don't use it:
+  pinMode(53, OUTPUT);
+
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    return;
+  }
+  Serial.println("card initialized.");
 }
 
 void loop() {
@@ -75,11 +129,41 @@ void loop() {
 }
 
 void BacklightOn() {
+  
+  // включить подсветку экрана
   digitalWrite(Backlight, HIGH);
 }
 
 void BacklightOff() {
+  
+  // выключить подсветку экрана
   digitalWrite(Backlight, LOW);
+}
+
+void BacklightFadeOn() {
+  
+  // увеличить подсветку экрана
+  analogWrite(Backlight, 254);  // зажигаем подсветку максимально ярко
+  delay(500);                   // Пауза 0,5 секунды
+  analogWrite(Backlight, 127);  // Делаем подсветку в 2 раза слабее
+  delay(500);                   // Пауза 0,5 секунды
+  analogWrite(Backlight, 63);   // Делаем подсветку еще в 2 раза слабее
+  delay(500);                   // Пауза 0,5 секунды
+  analogWrite(Backlight, 0);    // Выключаем подсветку полностью
+  delay(500);                   // Пауза 0,5 секунды
+}
+
+void BacklightFadeOff() {
+  
+  // уменьшить подсветку экрана
+  analogWrite(Backlight, 0);    // зажигаем подсветку максимально ярко
+  delay(500);                   // Пауза 0,5 секунды
+  analogWrite(Backlight, 63);   // Делаем подсветку в 2 раза слабее
+  delay(500);                   // Пауза 0,5 секунды
+  analogWrite(Backlight, 127);  // Делаем подсветку еще в 2 раза слабее
+  delay(500);                   // Пауза 0,5 секунды
+  analogWrite(Backlight, 254);  // Выключаем подсветку полностью
+  delay(500);                   // Пауза 0,5 секунды
 }
 
 void ReadSerialInput() {
@@ -108,22 +192,24 @@ void Calculate() {
   // пересчитаем значения
   VBATfloatValue  = (float(VBATvalue)  * 5) / 1023 * 2;
   SOLARfloatValue = (float(SOLARvalue) * 5) / 1023 * 3;
+
 }
 
 void PrintOnLcd() {
 
   lcd.setCursor(0, 0);            // move cursor to second line "0" and 0 spaces over
-  lcd.print("A=");                // display seconds elapsed since power-up
+  lcd.print("АКБ = ");                // display seconds elapsed since power-up
   lcd.print(VBATvalue);           // display seconds elapsed since power-up
   lcd.setCursor(0, 1);            // move cursor to second line "0" and 0 spaces over
-  lcd.print("B=");                // display seconds elapsed since power-
+  lcd.print("АКБ = ");                // display seconds elapsed since power-
   lcd.print(VBATfloatValue);      // display seconds elapsed since power-up
   lcd.setCursor(0, 2);            // move cursor to second line "0" and 0 spaces over
-  lcd.print("C=");                // display seconds elapsed since power-up
+  lcd.print("Солнце = ");                // display seconds elapsed since power-up
   lcd.print(SOLARvalue);          // display seconds elapsed since power-up
   lcd.setCursor(0, 3);            // move cursor to second line "0" and 0 spaces over
-  lcd.print("D=");                // display seconds elapsed since power-up
+  lcd.print("Солнце = ");                // display seconds elapsed since power-up
   lcd.print(SOLARfloatValue);     // display seconds elapsed since power-up
+
 }
 
 void PrintSerial() {
@@ -138,4 +224,5 @@ void PrintSerial() {
   Serial.print("Voltage = ");
   Serial.print(SOLARfloatValue);
   Serial.println(" ");
+
 }
